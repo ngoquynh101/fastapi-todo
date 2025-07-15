@@ -10,7 +10,7 @@ app = FastAPI(debug=True)
 
 origins = [
     "http://localhost",
-    "http://localhost:3000", # Địa chỉ frontend React của bạn
+    "http://localhost:3001", # Địa chỉ frontend React của bạn
 ]
 
 # Cho phép FE truy cập
@@ -39,6 +39,18 @@ def get_todos(db: Session = Depends(get_db)):
 @app.post("/todos", response_model=schemas.TodoResponse)
 def create_todo(todo: schemas.TodoCreate, db: Session = Depends(get_db)):
     return crud.create_todo(db, todo)
+
+#PUT
+@app.get("/todos/{todo_id}", response_model=schemas.TodoResponse, summary="Lấy công việc theo ID")
+def read_todo(todo_id: int, db: Session = Depends(get_db)):
+    """
+    Lấy thông tin chi tiết của một công việc dựa trên ID.
+    - **todo_id**: ID của công việc cần tìm.
+    """
+    todo = db.query(models.Todo).filter(models.Todo.id == todo_id).first()
+    if todo is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Công việc không tìm thấy")
+    return todo
 
 # PUT
 @app.put("/todos/{todo_id}", response_model=schemas.TodoResponse)
